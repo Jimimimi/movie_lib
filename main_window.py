@@ -7,9 +7,12 @@ import os
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
-        self.CreateStatusBar()  # A Statusbar in the bottom 
+        self.CreateStatusBar()  # A Statusbar in the bottom
 
-        # Setting up the menu.
+        #Create the Image Holder (imageHolder)
+        imageHolder=wx.Panel(self)
+
+        #Setting up the menu.
         #-----------------------------------------------------------------------------------------------------------
                 
         #Creating the File Menu (filemenu)
@@ -64,7 +67,17 @@ GitHub: https://github.com/XarisA/movie_lib
     def OnExit(self,e):
         self.Close(True)  # Close the frame.
     
+class ImgPanel(wx.Panel):
+    def __init__(self, parent, image):
+        wx.Panel.__init__(self, parent)
 
+        img = wx.Image(image, wx.BITMAP_TYPE_ANY)
+        self.sBmp = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(img))
+
+        sizer = wx.BoxSizer()
+        sizer.Add(item=self.sBmp, proportion=0, flag=wx.ALL, border=10)
+        self.SetBackgroundColour('green')
+        self.SetSizerAndFit(sizer)
 
 
 app = wx.App(False)
