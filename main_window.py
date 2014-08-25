@@ -6,12 +6,61 @@ import os
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(800,600))
+        wx.Frame.__init__(self, parent, title=title, size=(800,600),style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^wx.MAXIMIZE_BOX)
         self.CreateStatusBar()  # A Statusbar in the bottom
 
         #Create the Image Holder (imageHolder)
-        imageHolder=wx.Panel(self)
+        
+        
+        # Create the Two Boxes with 1 panel each
+                
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.pnl1 = wx.Panel(self, -1, size=(250,600), style=wx.NO_BORDER)
+        self.pnl2 = wx.Panel(self, -1, size=(600,600),style=wx.NO_BORDER)
+        
+        #image = wx.Image('C:\Users\Administrator\Pictures\img.jpg', wx.BITMAP_TYPE_ANY)
+        instructions = 'Kati ithela na grapsw edw alla ti?'
+        image = wx.EmptyImage(240,280)
+        self.PhotoMaxSize = 240
+        
+        
+        browseBtn = wx.Button(self.pnl1, label='Browse')
+        browseBtn.Bind(wx.EVT_BUTTON, self.onBrowse)
+        self.imageBitmap = wx.StaticBitmap(self.pnl1, wx.ID_ANY, wx.BitmapFromImage(image))
+        
+        instructLbl = wx.StaticText(self.pnl1, label=instructions)
+        self.photoTxt = wx.TextCtrl(self.pnl1, size=(68,0))
+        
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        
+        
+        mainSizer.Add(wx.StaticLine(self.pnl1, wx.ID_ANY),
+                           0, wx.ALL|wx.EXPAND, 5)
+        mainSizer.Add(instructLbl, 0, wx.ALL, 5)
+        mainSizer.Add(self.imageBitmap, 0, wx.ALL, 5)
+        sizer.Add(self.photoTxt, 0, wx.ALL, 5)
+        sizer.Add(browseBtn, 0, wx.ALL, 5)
+                
+        mainSizer.Add(sizer, 0, wx.ALL, 5)
+ 
+        self.pnl1.SetSizer(mainSizer)
 
+        mainSizer.Fit(self.pnl1)
+        self.pnl1.Layout()
+                
+                
+        hbox.Add(self.pnl1, 1, wx.EXPAND | wx.ALL, 3)
+        hbox.Add(self.pnl2, 1, wx.EXPAND | wx.ALL, 3)
+                            
+        self.SetSize((800, 600))
+        self.SetSizer(hbox)
+        self.Centre()
+        
+        
+        
         #Setting up the menu.
         #-----------------------------------------------------------------------------------------------------------
                 
@@ -56,7 +105,7 @@ Email: xaris@gmx.com
 This program is coded in python.
 It is a home movie library for managing movies, series or videos etc.
 
-Licence: Free
+Licence: Free 
 GitHub: https://github.com/XarisA/movie_lib
 '''
         dlg = wx.MessageDialog( self,AboutMessage, "Movie Library", wx.OK)
@@ -66,18 +115,36 @@ GitHub: https://github.com/XarisA/movie_lib
 
     def OnExit(self,e):
         self.Close(True)  # Close the frame.
-    
-class ImgPanel(wx.Panel):
-    def __init__(self, parent, image):
-        wx.Panel.__init__(self, parent)
-
-        img = wx.Image(image, wx.BITMAP_TYPE_ANY)
-        self.sBmp = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(img))
-
-        sizer = wx.BoxSizer()
-        sizer.Add(item=self.sBmp, proportion=0, flag=wx.ALL, border=10)
-        self.SetBackgroundColour('green')
-        self.SetSizerAndFit(sizer)
+               
+    def onBrowse(self,event):
+        """ 
+        Browse for file
+        """
+        wildcard = "JPEG files (*.jpg)|*.jpg"
+        dialog = wx.FileDialog(None, "Choose a file",
+                               wildcard=wildcard,
+                               style=wx.OPEN)
+        if dialog.ShowModal() == wx.ID_OK:
+            self.photoTxt.SetValue(dialog.GetPath())
+        dialog.Destroy() 
+        self.onView()
+ 
+    def onView(self):
+        filepath = self.photoTxt.GetValue()
+        img = wx.Image(filepath, wx.BITMAP_TYPE_ANY)
+        # scale the image, preserving the aspect ratio
+        W = img.GetWidth()
+        H = img.GetHeight()
+        if W > H:
+            NewW = self.PhotoMaxSize
+            NewH = self.PhotoMaxSize * H / W
+        else:
+            NewH = self.PhotoMaxSize
+            NewW = self.PhotoMaxSize * W / H
+        img = img.Scale(NewW,NewH)
+ 
+        self.imageBitmap.SetBitmap(wx.BitmapFromImage(img))
+        self.pnl1.Refresh()
 
 
 app = wx.App(False)
